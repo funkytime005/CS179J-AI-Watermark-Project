@@ -82,7 +82,8 @@ def apply_watermark(fileName): # applies watermark pattern to entire image
                 y = ytemp
     
     # print(t)
-    img.show() # show image
+    # img.show() # show image
+    img = img.save(fileName.removesuffix('.jpg') + '_watermarked.jpg') # save watermarked image to same file path
 
 def main():
     fileExists = False
