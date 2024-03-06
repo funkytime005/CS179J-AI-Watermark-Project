@@ -37,8 +37,8 @@ def set_last_digit(r, i, str, complement): # if the current binary digit of the 
             else: 
                 return r
 
-# applies the current unix timestamp in binary at the end of watermark (or its complement)
-def get_time(): # TODO: stub
+# returns the current unix timestamp (time since 1/1/1970) in seconds, converted to binary, as a string
+def get_time():
     return str(bin(int(time.time()))[2:]) # get unix timestamp to second, format as binary string
 
 def apply_watermark(fileName): # applies watermark pattern to entire image
