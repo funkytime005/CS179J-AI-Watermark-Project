@@ -50,15 +50,15 @@ def apply_watermark(fileName): # applies watermark pattern to entire image
     for x in range(width):
         for y in range(height):
             if (x % 50 == 0) and (y % 10 == 0) and (x + 50 < width) and (y + 10 < height): # watermark is 15 characters long + ~30 character long timestamp, so space 50 pixels apart for redundancy
-                [r, g, b] = _img[x, y]
-
                 xtemp = x
                 for i in range(len(WATERMARK_BINARY)): # apply invisible watermark
-                    r = set_last_digit(r, i, WATERMARK_BINARY, False)
+                    [r, g, b] = _img[x, y] # get rgb of current pixel
+                    r = set_last_digit(r, i, WATERMARK_BINARY, False) # accordingly set red channel (watermark)
                     img.putpixel((x, y), (r, g, b)) # draw marked pixel
                     x += 1 # shift x position by 1
 
                 for i in range(len(t)): # apply timestamp
+                    [r, g, b] = _img[x, y]
                     r = set_last_digit(r, i, t, False)
                     img.putpixel((x, y), (r, g, b))
                     x += 1
@@ -67,11 +67,13 @@ def apply_watermark(fileName): # applies watermark pattern to entire image
                 ytemp = y
                 y += 5
                 for i in range(len(WATERMARK_BINARY)): # apply complement: if the watermark is inverted and reapplied, then the watermark cannot be destroyed if a bad actor adds 1 to every rgb value to "sanitize" the photo
+                    [r, g, b] = _img[x, y]
                     r = set_last_digit(r, i, WATERMARK_BINARY, True)
-                    img.putpixel((x, y), (r, g, b)) # draw marked pixel
-                    x += 1 # shift x position by 1
+                    img.putpixel((x, y), (r, g, b)) 
+                    x += 1
                 
                 for i in range(len(t)): # apply complement of timestamp
+                    [r, g, b] = _img[x, y]
                     r = set_last_digit(r, i, t, True)
                     img.putpixel((x, y), (r, g, b))
                     x += 1
@@ -79,7 +81,7 @@ def apply_watermark(fileName): # applies watermark pattern to entire image
                 x = xtemp
                 y = ytemp
     
-
+    # print(t)
     img.show() # show image
 
 def main():
