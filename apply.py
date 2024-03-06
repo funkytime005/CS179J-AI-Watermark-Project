@@ -1,11 +1,13 @@
 import os
 from PIL import Image
+import time
 
-WATERMARK_BINARY = [1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0] # 15-digit watermark creates 0.0031% FP rate, can be changed arbitrarily
+WATERMARK_BINARY = ['1', '0', '0', '1', '1', '1', '0', '0', '1', '0', '0', '1', '1', '1', '0'] # 15-digit watermark creates 0.0031% FP rate, can be changed arbitrarily
 
-def set_last_digit(r, i, complement): # if the current binary digit of the watermark is 0, red channel's value should be even. else, red channel's value should be odd
+# returns an int 0-255, corresponding to either the passed in color channel or a 1-digit offset
+def set_last_digit(r, i, str, complement): # if the current binary digit of the watermark is 0, red channel's value should be even. else, red channel's value should be odd
     if not complement:
-        if WATERMARK_BINARY[i] == 0: # current digit is 0, make red channel even
+        if str[i] == '0': # current digit is 0, make red channel even
             # return 0 # temp test statement to make changes visibly obvious (when the whole point is to be invisible, it's difficult to ensure correctness visually)
         
             if r % 2 == 0: # red channel is already even -> do not alter
@@ -20,7 +22,7 @@ def set_last_digit(r, i, complement): # if the current binary digit of the water
             else: # red channel is already odd -> do not alter
                 return r
     else: # COMPLEMENT CASE: same procedure, but exactly the opposite. this applies the complement of the binary watermark, protecting it against tampering by inversion
-        if WATERMARK_BINARY[i] == 1: # check opposite digit to exactly invert above branch
+        if str[i] == '1': # check opposite digit to exactly invert above branch
             # return 0 # temp test statement to make changes visibly obvious (when the whole point is to be invisible, it's difficult to ensure correctness visually)
         
             if r % 2 == 0: 
@@ -35,37 +37,48 @@ def set_last_digit(r, i, complement): # if the current binary digit of the water
             else: 
                 return r
 
-def apply_timestamp(complement): # TODO: stub
-    pass
+# applies the current unix timestamp in binary at the end of watermark (or its complement)
+def get_time(): # TODO: stub
+    return str(bin(int(time.time()))[2:]) # get unix timestamp to second, format as binary string
 
 def apply_watermark(fileName): # applies watermark pattern to entire image
+    t = get_time()
     img = Image.open(fileName) # open passed filename
     _img = img.load()
     [width, height] = img.size
-    [x, y] = (int(width / 2), int(height / 2))
-    xtemp = x
 
-    for i in range(len(WATERMARK_BINARY)): # apply invisible watermark
-        [r, g, b] = _img[xtemp, y]
-        r = set_last_digit(r, i, False)
-        
-        img.putpixel((xtemp, y), (r, g, b)) # draw marked pixel
-        xtemp += 1 # shift x position by 1
+    for x in range(width):
+        for y in range(height):
+            if (x % 50 == 0) and (y % 10 == 0) and (x + 50 < width) and (y + 10 < height): # watermark is 15 characters long + ~30 character long timestamp, so space 50 pixels apart for redundancy
+                [r, g, b] = _img[x, y]
 
-    # TODO: APPLY UNIX TIMESTAMP IN BINARY TO END OF WATERMARK HERE
-    xtemp = x # reset temp position to center
+                xtemp = x
+                for i in range(len(WATERMARK_BINARY)): # apply invisible watermark
+                    r = set_last_digit(r, i, WATERMARK_BINARY, False)
+                    img.putpixel((x, y), (r, g, b)) # draw marked pixel
+                    x += 1 # shift x position by 1
 
-    ytemp = y + 10
-    for i in range(len(WATERMARK_BINARY)): # apply complement: if the watermark is inverted and reapplied, then the watermark cannot be destroyed if a bad actor adds 1 to every rgb value to "sanitize" the photo
-        [r, g, b] = _img[xtemp, ytemp]
-        r = set_last_digit(r, i, True)
+                for i in range(len(t)): # apply timestamp
+                    r = set_last_digit(r, i, t, False)
+                    img.putpixel((x, y), (r, g, b))
+                    x += 1
+                x = xtemp
+
+                ytemp = y
+                y += 5
+                for i in range(len(WATERMARK_BINARY)): # apply complement: if the watermark is inverted and reapplied, then the watermark cannot be destroyed if a bad actor adds 1 to every rgb value to "sanitize" the photo
+                    r = set_last_digit(r, i, WATERMARK_BINARY, True)
+                    img.putpixel((x, y), (r, g, b)) # draw marked pixel
+                    x += 1 # shift x position by 1
+                
+                for i in range(len(t)): # apply complement of timestamp
+                    r = set_last_digit(r, i, t, True)
+                    img.putpixel((x, y), (r, g, b))
+                    x += 1
+                
+                x = xtemp
+                y = ytemp
     
-        img.putpixel((xtemp, ytemp), (r, g, b)) # draw marked pixel
-        xtemp += 1 # shift x position by 1
-
-    # TODO: APPLY COMPLEMENT OF UNIX TIMESTAMP IN BINARY TO END OF WATERMARK HERE
-    xtemp = x # reset temp positions to center
-    ytemp = y
 
     img.show() # show image
 
