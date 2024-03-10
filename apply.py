@@ -3,7 +3,21 @@ from PIL import Image
 import time
 import requests
 
-WATERMARK_BINARY = ['1', '0', '0', '1', '1', '1', '0', '0', '1', '0', '0', '1', '1', '1', '0'] # 15-digit watermark creates 0.0031% FP rate, can be changed arbitrarily
+WATERMARK_BINARY = [['1', '0', '0', '1', '1', '1', '0', '0', '1', '0', '0', '1', '1', '1', '0'],
+                    ['1', '0', '0', '1', '1', '1', '0', '0', '1', '0', '0', '1', '1', '1', '0'],
+                    ['1', '0', '0', '1', '1', '1', '0', '0', '1', '0', '0', '1', '1', '1', '0'],
+                    ['1', '0', '0', '1', '1', '1', '0', '0', '1', '0', '0', '1', '1', '1', '0'],
+                    ['1', '0', '0', '1', '1', '1', '0', '0', '1', '0', '0', '1', '1', '1', '0'],
+                    ['1', '0', '0', '1', '1', '1', '0', '0', '1', '0', '0', '1', '1', '1', '0'],
+                    ['1', '0', '0', '1', '1', '1', '0', '0', '1', '0', '0', '1', '1', '1', '0'],
+                    ['1', '0', '0', '1', '1', '1', '0', '0', '1', '0', '0', '1', '1', '1', '0'],
+                    ['1', '0', '0', '1', '1', '1', '0', '0', '1', '0', '0', '1', '1', '1', '0'],
+                    ['1', '0', '0', '1', '1', '1', '0', '0', '1', '0', '0', '1', '1', '1', '0'],
+                    ['1', '0', '0', '1', '1', '1', '0', '0', '1', '0', '0', '1', '1', '1', '0'],
+                    ['1', '0', '0', '1', '1', '1', '0', '0', '1', '0', '0', '1', '1', '1', '0'],
+                    ['1', '0', '0', '1', '1', '1', '0', '0', '1', '0', '0', '1', '1', '1', '0'],
+                    ['1', '0', '0', '1', '1', '1', '0', '0', '1', '0', '0', '1', '1', '1', '0'],
+                    ['1', '0', '0', '1', '1', '1', '0', '0', '1', '0', '0', '1', '1', '1', '0']]
 
 # returns an int 0-255, corresponding to either the passed in color channel or a 1-digit offset
 # if the current binary digit of the watermark is 0, red channel's value should be even. else, red channel's value should be odd
@@ -70,57 +84,83 @@ def apply_watermark(fileName):
 
     for x in range(width):
         for y in range(height):
-            if (x % 50 == 0) and (y % 10 == 0) and (x + 50 < width) and (y + 10 < height): # watermark is 15 characters long + ~30 character long timestamp, so space 50 pixels apart for redundancy
-                xtemp = x
+            if (x % 60 == 0) and (y % 60 == 0) and (x + 60 < width) and (y + 60 < height):
+                # print(x, y)
+
                 for i in range(len(WATERMARK_BINARY)): # apply invisible watermark
-                    [r, g, b] = _img[x, y] # get rgb of current pixel
-                    r = set_last_digit(r, i, WATERMARK_BINARY, False) # accordingly set red channel (watermark)
-                    img.putpixel((x, y), (r, g, b)) # draw marked pixel
-                    x += 1 # shift x position by 1
-
-                for i in range(len(t)): # apply timestamp (same method as above)
-                    [r, g, b] = _img[x, y]
-                    r = set_last_digit(r, i, t, False)
-                    img.putpixel((x, y), (r, g, b))
-                    x += 1
-                x = xtemp
-
-                ytemp = y
-                y += 1
-                for i in range(len(ip)): # apply ip address
-                    [r, g, b] = _img[x, y]
-                    r = set_last_digit(r, i, ip, False)
-                    img.putpixel((x, y), (r, g, b))
-                    x += 1
-                y = ytemp
-                x = xtemp
-
-
-                y += 5
-                for i in range(len(WATERMARK_BINARY)): # apply complement: if the watermark is inverted and reapplied, then the watermark cannot be destroyed if a bad actor adds 1 to every rgb value to "sanitize" the photo
-                    [r, g, b] = _img[x, y]
-                    r = set_last_digit(r, i, WATERMARK_BINARY, True)
-                    img.putpixel((x, y), (r, g, b)) 
-                    x += 1
+                    xtemp = x + i
+                    for j in range(len(WATERMARK_BINARY[0])):
+                        ytemp = y + j
+                        [r, g, b] = _img[xtemp, ytemp] # get rgb of current pixel
+                        r = set_last_digit(r, i, WATERMARK_BINARY[j], False) # accordingly set red channel (watermark)
+                        img.putpixel((xtemp, ytemp), (r, g, b)) # draw marked pixel
                 
-                for i in range(len(t)): # apply complement of timestamp
-                    [r, g, b] = _img[x, y]
-                    r = set_last_digit(r, i, t, True)
-                    img.putpixel((x, y), (r, g, b))
-                    x += 1
-                x = xtemp
+                ytemp += 1
+                for i in range(len(t)): # apply timestamp (same method as above)
+                    xtemp = x + i
+                    [r, g, b] = _img[xtemp, ytemp]
+                    r = set_last_digit(r, i, t, False)
+                    img.putpixel((xtemp, ytemp), (r, g, b))
+                
+                ytemp += 1    
+                for i in range(len(ip)): # apply ip address
+                    xtemp = x + i
+                    [r, g, b] = _img[xtemp, ytemp]
+                    r = set_last_digit(r, i, ip, False)
+                    img.putpixel((xtemp, ytemp), (r, g, b))
 
-                y += 1
-                for i in range(len(ip)): # apply complement of ip address
-                    [r, g, b] = _img[x, y]
+                # APPLY COMPLEMENTS    
+        
+                for i in range(len(WATERMARK_BINARY)): # apply invisible watermark
+                    xtemp = x + 30 + i
+                    for j in range(len(WATERMARK_BINARY[0])):
+                        ytemp = y + 30 + j
+                        [r, g, b] = _img[xtemp, ytemp] # get rgb of current pixel
+                        r = set_last_digit(r, i, WATERMARK_BINARY[j], True) # accordingly set red channel (watermark)
+                        img.putpixel((xtemp, ytemp), (r, g, b)) # draw marked pixel
+
+                ytemp += 1
+                for i in range(len(t)): # apply timestamp (same method as above)
+                    xtemp = x + 30 + i
+                    [r, g, b] = _img[xtemp, ytemp]
+                    r = set_last_digit(r, i, t, True)
+                    img.putpixel((xtemp, ytemp), (r, g, b))
+                
+                ytemp += 1    
+                for i in range(len(ip)): # apply ip address
+                    xtemp = x + 30 + i
+                    [r, g, b] = _img[xtemp, ytemp]
                     r = set_last_digit(r, i, ip, True)
-                    img.putpixel((x, y), (r, g, b))
-                    x += 1
-                x = xtemp
-                y = ytemp
+                    img.putpixel((xtemp, ytemp), (r, g, b))
+
+                
+            # 
+                
+# 
+                # for i in range(len(WATERMARK_BINARY)): # apply complement: if the watermark is inverted and reapplied, then the watermark cannot be destroyed if a bad actor adds 1 to every rgb value to "sanitize" the photo
+                #     [r, g, b] = _img[x, y]
+                #     r = set_last_digit(r, i, WATERMARK_BINARY, True)
+                #     img.putpixel((x, y), (r, g, b)) 
+                #     x += 1
+# 
+                # for i in range(len(t)): # apply complement of timestamp
+                #     [r, g, b] = _img[x, y]
+                #     r = set_last_digit(r, i, t, True)
+                #     img.putpixel((x, y), (r, g, b))
+                #     x += 1
+                # x = xtemp
+# 
+                # y += 1
+                # for i in range(len(ip)): # apply complement of ip address
+                #     [r, g, b] = _img[x, y]
+                #     r = set_last_digit(r, i, ip, True)
+                #     img.putpixel((x, y), (r, g, b))
+                #     x += 1
+                # x = xtemp
+                # y = ytemp
     
     # print(t)
-    # img.show() # show image
+    img.show() # show image
     img = img.save(fileName.removesuffix('.jpg') + '_watermarked.jpg', quality = 100) # save watermarked image to same file path
 
 # driver code, takes in and verifies file, then sends it to apply_watermark()
