@@ -8,7 +8,7 @@ WATERMARK_BINARY = ['1', '0', '0', '1', '1', '1', '0', '0', '1', '0', '0', '1', 
 # returns an int 0-255, corresponding to either the passed in color channel or a 1-digit offset
 # if the current binary digit of the watermark is 0, red channel's value should be even. else, red channel's value should be odd
 def set_last_digit(r, i, str, complement): 
-    test = True # SET THIS TO FALSE WHEN YOU'RE ACTUALLY USING IT, IT MAKES IT REALLY EASY TO SEE WHEN IT'S TRUE FOR DEBUGGING
+    test = False # SET THIS TO FALSE WHEN YOU'RE ACTUALLY USING IT, IT MAKES IT REALLY EASY TO SEE WHEN IT'S TRUE FOR DEBUGGING
     if not complement:
         if str[i] == '0': # current digit is 0, make red channel even
             if test:
