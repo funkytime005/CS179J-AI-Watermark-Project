@@ -44,7 +44,7 @@ def set_last_digit(r, i, str, complement):
             else: 
                 return r
 
-# returns current unix timestamp to the nearest second in binary as a string
+# returns the current unix timestamp (time since 1/1/1970) in seconds, converted to binary, as a string
 def get_time():
     return str(bin(int(time.time()))[2:]) # get unix timestamp to second, format as binary string
 
