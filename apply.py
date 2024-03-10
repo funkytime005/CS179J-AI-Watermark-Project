@@ -132,36 +132,8 @@ def apply_watermark(fileName):
                     [r, g, b] = _img[xtemp, ytemp]
                     r = set_last_digit(r, i, ip, True)
                     img.putpixel((xtemp, ytemp), (r, g, b))
-
-                
-            # 
-                
-# 
-                # for i in range(len(WATERMARK_BINARY)): # apply complement: if the watermark is inverted and reapplied, then the watermark cannot be destroyed if a bad actor adds 1 to every rgb value to "sanitize" the photo
-                #     [r, g, b] = _img[x, y]
-                #     r = set_last_digit(r, i, WATERMARK_BINARY, True)
-                #     img.putpixel((x, y), (r, g, b)) 
-                #     x += 1
-# 
-                # for i in range(len(t)): # apply complement of timestamp
-                #     [r, g, b] = _img[x, y]
-                #     r = set_last_digit(r, i, t, True)
-                #     img.putpixel((x, y), (r, g, b))
-                #     x += 1
-                # x = xtemp
-# 
-                # y += 1
-                # for i in range(len(ip)): # apply complement of ip address
-                #     [r, g, b] = _img[x, y]
-                #     r = set_last_digit(r, i, ip, True)
-                #     img.putpixel((x, y), (r, g, b))
-                #     x += 1
-                # x = xtemp
-                # y = ytemp
     
-    # print(t)
-    img.show() # show image
-    img = img.save(fileName.removesuffix('.jpg') + '_watermarked.jpg', quality = 100) # save watermarked image to same file path
+    img = img.save(fileName.removesuffix('.png') + '_watermarked.png', quality = 'keep', subsampling = 0) # save watermarked image to same file path
 
 # driver code, takes in and verifies file, then sends it to apply_watermark()
 def main():
