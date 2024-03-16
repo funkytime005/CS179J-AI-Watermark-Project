@@ -2,6 +2,7 @@ import os
 from PIL import Image
 import time
 import requests
+from datetime import datetime
 
 WATERMARK_BINARY = [['1', '0', '0', '1', '1', '1', '0', '0', '1', '0', '0', '1', '1', '1', '0'],
                     ['1', '0', '0', '1', '1', '1', '0', '0', '1', '0', '0', '1', '1', '1', '0'],
@@ -136,19 +137,29 @@ def apply_watermark(fileName):
                     img.putpixel((xtemp, ytemp), (r, g, b))
     
     img = img.save(fileName.removesuffix('.png') + '_watermarked.png', quality = 'keep', subsampling = 0) # save watermarked image to same file path
+    time = int(t, 2)
+    dt = datetime.fromtimestamp(time)
+    
+    print(f'Watermark successfully applied on {dt.strftime('%m-%d-%Y %H:%M:%S')}')
 
 # driver code, takes in and verifies file, then sends it to apply_watermark()
 def main():
-    fileExists = False
-    while not fileExists: # continuously ask for file name until valid file entered
-        name = input('Enter name of file in current folder: ') # get filename
-        for file in os.listdir(): # read through current directory
-            if file == name:
-                fileExists = True # found file, stop looping 
-        if not fileExists:
-            print(name + " not found.") # error then try again
+    quit = False
+    while not quit:
+        fileExists = False
+        while not fileExists: # continuously ask for file name until valid file entered
+            name = input('Enter name of file in current folder: ') # get filename
+            for file in os.listdir(): # read through current directory
+                if file == name:
+                    fileExists = True # found file, stop looping 
+            if not fileExists:
+                print(name + " not found.") # error then try again
 
-    apply_watermark(name)
+        apply_watermark(name)
+
+        q = input('Watermark another file? (y/n): ')
+        if q == 'n' or q == 'N':
+            quit = True
 
 if __name__ == "__main__":
     main()

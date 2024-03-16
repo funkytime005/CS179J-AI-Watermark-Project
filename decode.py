@@ -138,7 +138,8 @@ def decode(filename):
 
                     # print the IP address
                     ip_address = f"{val1}.{val2}.{val3}.{val4}"
-                    print("IP Address of the Watermark:", ip_address)
+                    ip_truncated = "***.***." + f"{val3}.{val4}"
+                    print("Watermark applied at public IP ", ip_truncated)
                     
                     break
                 # for every iteration, if the comparison is false, reset watermark_bits
@@ -157,16 +158,24 @@ def decode(filename):
         print("Watermark found")
 
 def main():
-    fileExists = False
-    while not fileExists:
-        name = input('Enter name of file in current folder: ')
-        for file in os.listdir():
-            if file == name:
-                fileExists = True
-        if not fileExists:
-            print(name + " not found.")
+    quit = False
+    while not quit:
+        fileExists = False
+        while not fileExists:
+            name = input('Enter name of file in current folder: ')
+            for file in os.listdir():
+                if file == name:
+                    fileExists = True
+            if not fileExists:
+                print(name + " not found.")
 
-    decode(name)
+        decode(name)
+
+        q = input('Read another file? (y/n): ')
+        if q == 'n' or q == 'N':
+            quit = True
+
+    
 
 if __name__ == "__main__":
     main()
