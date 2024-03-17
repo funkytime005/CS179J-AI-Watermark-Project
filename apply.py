@@ -140,7 +140,7 @@ def apply_watermark(fileName):
     time = int(t, 2)
     dt = datetime.fromtimestamp(time)
     
-    print(f'Watermark successfully applied on {dt.strftime('%m-%d-%Y %H:%M:%S')}')
+    print(f"Watermark successfully applied on {dt.strftime('%m-%d-%Y %H:%M:%S')}")
 
 # driver code, takes in and verifies file, then sends it to apply_watermark()
 def main():
